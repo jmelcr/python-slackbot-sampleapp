@@ -14,4 +14,5 @@ slackclient==2.7.3
 slackeventsapi==2.2.1
 typing-extensions==3.7.4.2
 Werkzeug==1.0.1
+gunicorn
 # yarl==1.5.0
