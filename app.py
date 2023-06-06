@@ -101,11 +101,15 @@ def message(payload):
             # code inspired by https://www.pragnakalp.com/build-an-automated-ai-powered-slack-chatbot-with-chatgpt-using-flask/
             prompt = text.replace("hi ", " ", 1)
             channel_id = event.get('channel')
-            #user_id = event.get('user')
+            user_id = event.get('user')
             #text = event.get('text')  # already done above
             #print(text)
             completion = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo", 
+                max_tokens=200,
+                user=user_id,
+                n=1,
+                stop=['hi', "\n"],
                 messages=[
                     {"role": "user", "content": prompt}]
                 )
