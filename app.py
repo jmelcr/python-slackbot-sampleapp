@@ -101,14 +101,13 @@ def message(payload):
                 #text = event.get('text')  # already done above
                 #print(text)
                 completion = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4", 
                     messages=[
                         {"role": "user", "content": text}]
                     )
                 response = completion['choices'][0]['message']['content']
                 #print("ChatGPT Response=>",chatbot_res)
-                #client.chat_postMessage(channel=channel_id,text=chatbot_res)
-                return response
+                return client.chat_postMessage(channel=channel_id,text=response)
 
             
 
