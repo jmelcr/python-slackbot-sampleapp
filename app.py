@@ -18,6 +18,7 @@ slack_web_client = WebClient(token=os.environ.get("SLACKBOT_TOKEN"))
 
 # OpenAI API key to use
 openai.api_key = os.environ.get("OPENAI_API_KEY")
+chat_max_tokens = os.environ.get("CHAT_MAX_TOKENS")
 
 def random_action(channel, action=None, **kwargs):
     """Determine which action to perform based on parameter. For roll die if 
@@ -106,7 +107,7 @@ def message(payload):
             #print(text)
             completion = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo", 
-                max_tokens=200,
+                max_tokens=chat_max_tokens,
                 user=user_id,
                 n=1,
                 messages=[
