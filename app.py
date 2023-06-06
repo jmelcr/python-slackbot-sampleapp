@@ -2,9 +2,11 @@ import os
 import re
 import logging
 from flask import Flask
+from flask import request
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
 from randombot import RandomBot
+import openai
 
 # Initialize a Flask app to host the events adapter
 app = Flask(__name__)
@@ -13,6 +15,9 @@ slack_events_adapter = SlackEventAdapter(os.environ.get("SLACK_EVENTS_TOKEN"), "
 
 # Initialize a Web API client
 slack_web_client = WebClient(token=os.environ.get("SLACKBOT_TOKEN"))
+
+# OpenAI API key to use
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 def random_action(channel, action=None, **kwargs):
     """Determine which action to perform based on parameter. For roll die if 
@@ -43,47 +48,69 @@ def random_action(channel, action=None, **kwargs):
 def message(payload):
     """Parse the message event, and if the activation string is in the text,
     simulate a coin flip and send the result.
+    If neither of the >random actions< is triggered, 
+    treat the text as prompt for chatGPT to complete. 
     """
 
-    # Get the event data from the payload
-    event = payload.get("event", {})
+    if request.method == 'POST':
+        # Get the event data from the payload
+        event = payload.get("event", {})
 
-    # Get the text from the event that came through
-    text = event.get("text")
+        # Get the text from the event that came through
+        text = event.get("text")
 
-    # Check and see if the activation phrase was in the text of the message.
-    # If so, execute the code to flip a coin.
-    if "flip a coin" in text.lower():
-        # Since the activation phrase was met, get the channel ID that the event
-        # was executed on
-        channel_id = event.get("channel")
-        # Execute the random action as a coin flip
-        return random_action(channel_id, action="coin")
-    elif "roll a die" in text.lower() or "roll a dice" in text.lower():
-        # Since the activation phrase was met, get the channel ID that the event
-        # was executed on
-        channel_id = event.get("channel")
-        # Execute the random action as a coin flip
-        return random_action(channel_id, action="die")
-    elif "pick a card" in text.lower() or "choose a card" in text.lower():
-        # Since the activation phrase was met, get the channel ID that the event
-        # was executed on
-        channel_id = event.get("channel")
-        # Execute the random action as a coin flip
-        return random_action(channel_id, action="card")
-    elif "roll a d" in text.lower():
-        # Since the activation phrase was met, get the channel ID that the event
-        # was executed on
-        channel_id = event.get("channel")
+        # Check and see if the activation phrase was in the text of the message.
+        # If so, execute the code to flip a coin.
+        if "flip a coin" in text.lower():
+            # Since the activation phrase was met, get the channel ID that the event
+            # was executed on
+            channel_id = event.get("channel")
+            # Execute the random action as a coin flip
+            return random_action(channel_id, action="coin")
+        elif "roll a die" in text.lower() or "roll a dice" in text.lower():
+            # Since the activation phrase was met, get the channel ID that the event
+            # was executed on
+            channel_id = event.get("channel")
+            # Execute the random action as a coin flip
+            return random_action(channel_id, action="die")
+        elif "pick a card" in text.lower() or "choose a card" in text.lower():
+            # Since the activation phrase was met, get the channel ID that the event
+            # was executed on
+            channel_id = event.get("channel")
+            # Execute the random action as a coin flip
+            return random_action(channel_id, action="card")
+        elif "roll a d" in text.lower():
+            # Since the activation phrase was met, get the channel ID that the event
+            # was executed on
+            channel_id = event.get("channel")
 
-        # Strip out the number from the command
-        droll = text.split("roll a")[1].strip().split()[0]
-        try:
-            int(droll[1:])
-        except ValueError:
-            pass
+            # Strip out the number from the command
+            droll = text.split("roll a")[1].strip().split()[0]
+            try:
+                int(droll[1:])
+            except ValueError:
+                pass
+            else:
+                return random_action(channel_id, action="die", sides=int(droll[1:]))
         else:
-            return random_action(channel_id, action="die", sides=int(droll[1:]))
+            #send the prompt to openAI API for reply
+            # code inspired by https://www.pragnakalp.com/build-an-automated-ai-powered-slack-chatbot-with-chatgpt-using-flask/
+            if event['client_msg_id']:
+                channel_id = event.get('channel')
+                user_id = event.get('user')
+                #text = event.get('text')  # already done above
+                #print(text)
+                completion = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "user", "content": text}]
+                    )
+                response = completion['choices'][0]['message']['content']
+                #print("ChatGPT Response=>",chatbot_res)
+                #client.chat_postMessage(channel=channel_id,text=chatbot_res)
+                return response
+
+            
 
 if __name__ == "__main__":
     # Create the logging object
