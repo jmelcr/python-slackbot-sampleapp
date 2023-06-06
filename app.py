@@ -101,7 +101,7 @@ def message(payload):
                 #text = event.get('text')  # already done above
                 #print(text)
                 completion = openai.ChatCompletion.create(
-                    model="gpt-4", 
+                    model="gpt-3.5-turbo", 
                     messages=[
                         {"role": "user", "content": text}]
                     )
