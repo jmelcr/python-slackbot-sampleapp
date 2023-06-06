@@ -95,20 +95,19 @@ def message(payload):
         else:
             #send the prompt to openAI API for reply
             # code inspired by https://www.pragnakalp.com/build-an-automated-ai-powered-slack-chatbot-with-chatgpt-using-flask/
-            if event['client_msg_id']:
-                channel_id = event.get('channel')
-                user_id = event.get('user')
-                #text = event.get('text')  # already done above
-                #print(text)
-                completion = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo", 
-                    messages=[
-                        {"role": "user", "content": text}]
-                    )
-                response = completion['choices'][0]['message']['content']
-                #print("ChatGPT Response=>",chatbot_res)
-                slack_web_client.chat_postMessage(channel=channel_id,text=response)
-                return message
+            channel_id = event.get('channel')
+            #user_id = event.get('user')
+            #text = event.get('text')  # already done above
+            #print(text)
+            completion = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo", 
+                messages=[
+                    {"role": "user", "content": text}]
+                )
+            response = completion['choices'][0]['message']['content']
+            #print("ChatGPT Response=>",chatbot_res)
+            slack_web_client.chat_postMessage(channel=channel_id,text=response)
+            return message
 
             
 
