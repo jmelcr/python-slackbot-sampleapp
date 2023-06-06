@@ -92,7 +92,7 @@ def message(payload):
                 pass
             else:
                 return random_action(channel_id, action="die", sides=int(droll[1:]))
-        elif text.startswith("hi ":
+        elif text.startswith("hi "):
             # it is crucial that the bot does not respond to anything 
             # as then it would start talking to itself.
             # Having a requirement to start the prompt with something (here "hi")
