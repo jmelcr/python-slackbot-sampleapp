@@ -92,9 +92,14 @@ def message(payload):
                 pass
             else:
                 return random_action(channel_id, action="die", sides=int(droll[1:]))
-        else:
-            #send the prompt to openAI API for reply
+        elif text.startswith("hi ":
+            # it is crucial that the bot does not respond to anything 
+            # as then it would start talking to itself.
+            # Having a requirement to start the prompt with something (here "hi")
+            # makes it rather unprobable that the bot will keep saying hi-s to itself. 
+            # Then send the prompt to openAI API for reply
             # code inspired by https://www.pragnakalp.com/build-an-automated-ai-powered-slack-chatbot-with-chatgpt-using-flask/
+            prompt = text.replace("hi ", " ", 1)
             channel_id = event.get('channel')
             #user_id = event.get('user')
             #text = event.get('text')  # already done above
@@ -102,7 +107,7 @@ def message(payload):
             completion = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo", 
                 messages=[
-                    {"role": "user", "content": text}]
+                    {"role": "user", "content": prompt}]
                 )
             response = completion['choices'][0]['message']['content']
             #print("ChatGPT Response=>",chatbot_res)
