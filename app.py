@@ -107,7 +107,8 @@ def message(payload):
                     )
                 response = completion['choices'][0]['message']['content']
                 #print("ChatGPT Response=>",chatbot_res)
-                return slack_web_client.chat_postMessage(channel=channel_id,text=response)
+                slack_web_client.chat_postMessage(channel=channel_id,text=response)
+                return message
 
             
 
