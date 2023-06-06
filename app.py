@@ -109,7 +109,7 @@ def message(payload):
                 max_tokens=200,
                 user=user_id,
                 n=1,
-                stop=['hi', "\n"],
+                stop=['hi', "\n\n"],
                 messages=[
                     {"role": "user", "content": prompt}]
                 )
