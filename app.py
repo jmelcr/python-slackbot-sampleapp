@@ -93,30 +93,40 @@ def message(payload):
                 pass
             else:
                 return random_action(channel_id, action="die", sides=int(droll[1:]))
-        elif text.startswith("hi "):
+        elif text.lower().startswith(("q ","q:")):
             # it is crucial that the bot does not respond to anything 
             # as then it would start talking to itself.
-            # Having a requirement to start the prompt with something (here "hi")
-            # makes it rather unprobable that the bot will keep saying hi-s to itself. 
+            # Having a requirement to start the prompt with something (here "q " or "q:")
+            # makes it rather unprobable that the bot will make prompts to itself. 
             # Then send the prompt to openAI API for reply
             # code inspired by https://www.pragnakalp.com/build-an-automated-ai-powered-slack-chatbot-with-chatgpt-using-flask/
-            prompt = text.replace("hi ", " ", 1)
+
+            prompt = text[2:]
             channel_id = event.get('channel')
             user_id = event.get('user')
-            #text = event.get('text')  # already done above
-            #print(text)
+            
+            # use openAI API to respond to the prompt using chat-completion method
             completion = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo", 
                 max_tokens=chat_max_tokens,
                 user=user_id,
                 n=1,
+                request_timeout=0.01,
                 messages=[
                     {"role": "user", "content": prompt}]
                 )
             response = completion['choices'][0]['message']['content']
-            #print("ChatGPT Response=>",chatbot_res)
-            slack_web_client.chat_postMessage(channel=channel_id,text=response)
-            return response
+            # include the response in a standard message block
+            message_block = {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": response
+                },
+            }
+            # post the message to Slack
+            slack_web_client.chat_postMessage(channel=channel_id,blocks=[message_block,])
+            return None
 
             
 
@@ -132,4 +142,4 @@ if __name__ == "__main__":
 
     # Run our app on our externally facing IP address on port 3000 instead of
     # running it on localhost, which is traditional for development.
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080, debug=True)
