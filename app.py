@@ -107,16 +107,20 @@ def message(payload):
             user_id = event.get('user')
             
             # use openAI API to respond to the prompt using chat-completion method
-            completion = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo", 
-                max_tokens=chat_max_tokens,
-                user=user_id,
-                n=1,
-                request_timeout=chat_request_timeout,
-                messages=[
-                    {"role": "user", "content": prompt}]
-                )
-            response = completion['choices'][0]['message']['content']
+            try:
+                completion = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo", 
+                    max_tokens=chat_max_tokens,
+                    user=user_id,
+                    n=1,
+                    request_timeout=chat_request_timeout,
+                    messages=[
+                        {"role": "user", "content": prompt}]
+                    )
+                response = completion['choices'][0]['message']['content']
+            except:
+                response = "(connection to chatGPT probably timed out)"
+                
             # include the response in a standard message block
             message_block = {
                 "type": "section",
