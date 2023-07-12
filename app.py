@@ -1,6 +1,7 @@
 import os
 import re
 import logging
+import threading
 from flask import Flask
 from flask import request
 from slack import WebClient
@@ -101,39 +102,53 @@ def message(payload):
             # makes it rather unprobable that the bot will make prompts to itself. 
             # Then send the prompt to openAI API for reply
             # code inspired by https://www.pragnakalp.com/build-an-automated-ai-powered-slack-chatbot-with-chatgpt-using-flask/
+            # 
+            # this code used to have troubles as described (and solved) at: 
+            # https://stackoverflow.com/questions/57418116/how-to-send-a-http-200-for-an-event-request-for-slack-api-in-python-request#57420023
 
             prompt = text[2:]
-            channel_id = event.get('channel')
-            user_id = event.get('user')
             
-            # use openAI API to respond to the prompt using chat-completion method
-            try:
-                completion = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo", 
-                    max_tokens=chat_max_tokens,
-                    user=user_id,
-                    n=1,
-                    request_timeout=chat_request_timeout,
-                    messages=[
-			{"role": "system", "content": "You are a helpful assistant that provides concise replies to the point."}, 
-                        {"role": "user", "content": prompt}
-                    ]
-                    )
-                response = completion['choices'][0]['message']['content']
-            except:
-                response = "(connection to chatGPT probably timed out)"
-                
-            # include the response in a standard message block
-            message_block = {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": response
-                },
-            }
-            # post the message to Slack
-            slack_web_client.chat_postMessage(channel=channel_id,blocks=[message_block,])
+            # starting a new thread for doing the actual openAI API calling
+            x = threading.Thread(
+                    target=chat_completion,
+                    args=(event, prompt)
+                )
+            x.start()
             return None
+
+
+
+def chat_completion(event, prompt):
+    channel_id = event.get('channel')
+    user_id = event.get('user')
+    try:
+        # use openAI API to respond to the prompt using chat-completion method
+	completion = openai.ChatCompletion.create(
+	    model="gpt-3.5-turbo", 
+	    max_tokens=chat_max_tokens,
+	    user=user_id,
+	    n=1,
+	    request_timeout=chat_request_timeout,
+	    messages=[
+		{"role": "system", "content": "You are a helpful assistant that provides concise replies to the point."}, 
+		{"role": "user", "content": prompt}
+	    ]
+	    )
+	response = completion['choices'][0]['message']['content']
+    except:
+	response = "(connection to chatGPT probably timed out)"
+	
+    # include the response in a standard message block
+    message_block = {
+	"type": "section",
+	"text": {
+	    "type": "mrkdwn",
+	    "text": response
+	},
+    }
+    # post the message to Slack
+    slack_web_client.chat_postMessage(channel=channel_id,blocks=[message_block,])
+    return response
 
             
 
@@ -149,4 +164,4 @@ if __name__ == "__main__":
 
     # Run our app on our externally facing IP address on port 3000 instead of
     # running it on localhost, which is traditional for development.
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=False)
