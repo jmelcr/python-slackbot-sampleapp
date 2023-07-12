@@ -115,7 +115,9 @@ def message(payload):
                     n=1,
                     request_timeout=chat_request_timeout,
                     messages=[
-                        {"role": "user", "content": prompt}]
+			{"role": "system", "content": "You are a helpful assistant that provides concise replies to the point."}, 
+                        {"role": "user", "content": prompt}
+                    ]
                     )
                 response = completion['choices'][0]['message']['content']
             except:
