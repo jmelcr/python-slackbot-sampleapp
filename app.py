@@ -123,28 +123,28 @@ def chat_completion(event, prompt):
     user_id = event.get('user')
     try:
         # use openAI API to respond to the prompt using chat-completion method
-	completion = openai.ChatCompletion.create(
-	    model="gpt-3.5-turbo", 
-	    max_tokens=chat_max_tokens,
-	    user=user_id,
-	    n=1,
-	    request_timeout=chat_request_timeout,
-	    messages=[
-		{"role": "system", "content": "You are a helpful assistant that provides concise replies to the point."}, 
-		{"role": "user", "content": prompt}
-	    ]
-	    )
-	response = completion['choices'][0]['message']['content']
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", 
+            max_tokens=chat_max_tokens,
+            user=user_id,
+            n=1,
+            request_timeout=chat_request_timeout,
+            messages=[
+               {"role": "system", "content": "You are a helpful assistant that provides concise replies to the point."}, 
+               {"role": "user", "content": prompt}
+            ]
+            )
+        response = completion['choices'][0]['message']['content']
     except:
-	response = "(connection to chatGPT probably timed out)"
+        response = "(connection to chatGPT probably timed out)"
 	
     # include the response in a standard message block
     message_block = {
-	"type": "section",
-	"text": {
-	    "type": "mrkdwn",
-	    "text": response
-	},
+        "type": "section",
+        "text": {
+            "type": "mrkdwn",
+            "text": response
+        },
     }
     # post the message to Slack
     slack_web_client.chat_postMessage(channel=channel_id,blocks=[message_block,])
