@@ -17,11 +17,11 @@ slack_events_adapter = SlackEventAdapter(os.environ.get("SLACK_EVENTS_TOKEN"), "
 # Initialize a Web API client
 slack_web_client = WebClient(token=os.environ.get("SLACKBOT_TOKEN"))
 
-# OpenAI API key to use
+# OpenAI API key to use and model +parameters
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 chat_max_tokens = int(os.environ.get("CHAT_MAX_TOKENS"))
 chat_request_timeout = float(os.environ.get("CHAT_REQUEST_TIMEOUT"))
-openai_llm_model_type = os.environ.get("OPENAI_LLM_MODEL_TYPE")
+openai_llm_model_type = str(os.environ.get("OPENAI_LLM_MODEL_TYPE"))
 
 def random_action(channel, action=None, **kwargs):
     """Determine which action to perform based on parameter. For roll die if 
