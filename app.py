@@ -21,6 +21,7 @@ slack_web_client = WebClient(token=os.environ.get("SLACKBOT_TOKEN"))
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 chat_max_tokens = int(os.environ.get("CHAT_MAX_TOKENS"))
 chat_request_timeout = float(os.environ.get("CHAT_REQUEST_TIMEOUT"))
+openai_llm_model_type = os.environ.get("OPENAI_LLM_MODEL_TYPE")
 
 def random_action(channel, action=None, **kwargs):
     """Determine which action to perform based on parameter. For roll die if 
@@ -124,7 +125,7 @@ def chat_completion(event, prompt):
     try:
         # use openAI API to respond to the prompt using chat-completion method
         completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo", 
+            model=openai_llm_model_type, 
             max_tokens=chat_max_tokens,
             user=user_id,
             n=1,
