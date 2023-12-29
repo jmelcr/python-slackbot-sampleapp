@@ -22,6 +22,8 @@ openai.api_key = os.environ.get("OPENAI_API_KEY")
 chat_max_tokens = int(os.environ.get("CHAT_MAX_TOKENS"))
 chat_request_timeout = float(os.environ.get("CHAT_REQUEST_TIMEOUT"))
 openai_llm_model_type = str(os.environ.get("OPENAI_LLM_MODEL_TYPE"))
+openai_image_gen_model_type = str(os.environ.get("OPENAI_IMG_GEN_MODEL_TYPE"))
+openai_image_size = str(os.environ.get("OPENAI_IMG_SIZE"))
 
 def random_action(channel, action=None, **kwargs):
     """Determine which action to perform based on parameter. For roll die if 
@@ -116,10 +118,23 @@ def message(payload):
                 )
             x.start()
             return None
+        elif text.lower().startswith(("qi ","qi:")):
+            prompt = text[2:]
+            
+            # starting a new thread for doing the actual openAI API calling
+            x = threading.Thread(
+                    target=img_generation,
+                    args=(event, prompt)
+                )
+            x.start()
+            return None
 
 
 
 def chat_completion(event, prompt):
+"""
+generate a response to the given prompt using GPT-based completion API
+"""
     channel_id = event.get('channel')
     user_id = event.get('user')
     try:
@@ -151,6 +166,38 @@ def chat_completion(event, prompt):
     slack_web_client.chat_postMessage(channel=channel_id,blocks=[message_block,])
     return response
 
+
+def img_generation(event, prompt):
+""" generate image for the given prompt 
+    and return link to the image as a message
+"""
+    channel_id = event.get('channel')
+    user_id = event.get('user')
+
+    try:
+        # use openAI API to respond to the prompt using image generation
+        generated_image = openai.images.generate(
+          model=openai_image_gen_model_type, 
+          prompt=prompt,
+          n=1,
+          size=openai_image_size
+          )
+        image_url = generated_image.data[0].url
+        response = image_url
+    except:
+        response = "(connection to chatGPT probably timed out)"
+	
+    # include the response in a standard message block
+    message_block = {
+        "type": "section",
+        "text": {
+            "type": "mrkdwn",
+            "text": "[link to image]({})".format(response)
+        },
+    }
+    # post the message to Slack
+    slack_web_client.chat_postMessage(channel=channel_id,blocks=[message_block,])
+    return response
             
 
 if __name__ == "__main__":
