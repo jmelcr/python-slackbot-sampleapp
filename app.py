@@ -119,7 +119,7 @@ def message(payload):
             x.start()
             return None
         elif text.lower().startswith(("qi ","qi:")):
-            prompt = text[2:]
+            prompt = text[3:]
             
             # starting a new thread for doing the actual openAI API calling
             x = threading.Thread(
@@ -184,7 +184,7 @@ def img_generation(event, prompt):
           size=openai_image_size
           )
         image_url = generated_image.data[0].url
-        response = image_url
+        response = "link to image: {}".format(image_url) 
     except:
         response = "(connection to chatGPT probably timed out)"
 	
@@ -193,7 +193,7 @@ def img_generation(event, prompt):
         "type": "section",
         "text": {
             "type": "mrkdwn",
-            "text": "[link to image]({})".format(response)
+            "text": response
         },
     }
     # post the message to Slack
