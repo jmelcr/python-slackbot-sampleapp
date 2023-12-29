@@ -138,9 +138,12 @@ def chat_completion(event, prompt):
     """
     channel_id = event.get('channel')
     user_id = event.get('user')
+     
+    openai_client = OpenAI()
+
     try:
         # use openAI API to respond to the prompt using chat-completion method
-        completion = openai.ChatCompletion.create(
+        completion = openai_client.client.chat.completions.create(
             model=openai_llm_model_type, 
             max_tokens=chat_max_tokens,
             user=user_id,
@@ -178,14 +181,6 @@ def img_generation(event, prompt):
      
     openai_client = OpenAI()
 
-    generated_image = openai_client.images.generate(
-      model=openai_image_gen_model_type, 
-      prompt=prompt,
-      n=1,
-      size=openai_image_size
-      )
-    image_url = generated_image.data[0].url
-    response = "link to image: {}".format(image_url) 
     try:
         # use openAI API to respond to the prompt using image generation
         generated_image = openai_client.images.generate(
@@ -197,8 +192,7 @@ def img_generation(event, prompt):
         image_url = generated_image.data[0].url
         response = "link to image: {}".format(image_url) 
     except:
-        response += "OUOUOU"
-        #response = "(connection to chatGPT probably timed out)"
+        response = "(connection to chatGPT probably timed out)"
 	
     # include the response in a standard message block
     message_block = {
