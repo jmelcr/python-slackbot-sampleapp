@@ -175,6 +175,14 @@ def img_generation(event, prompt):
     channel_id = event.get('channel')
     user_id = event.get('user')
 
+    generated_image = openai.images.generate(
+      model=openai_image_gen_model_type, 
+      prompt=prompt,
+      n=1,
+      size=openai_image_size
+      )
+    image_url = generated_image.data[0].url
+    response = "link to image: {}".format(image_url) 
     try:
         # use openAI API to respond to the prompt using image generation
         generated_image = openai.images.generate(
@@ -186,7 +194,8 @@ def img_generation(event, prompt):
         image_url = generated_image.data[0].url
         response = "link to image: {}".format(image_url) 
     except:
-        response = "(connection to chatGPT probably timed out)"
+        response += "OUOUOU"
+        #response = "(connection to chatGPT probably timed out)"
 	
     # include the response in a standard message block
     message_block = {
