@@ -132,9 +132,9 @@ def message(payload):
 
 
 def chat_completion(event, prompt):
-"""
-generate a response to the given prompt using GPT-based completion API
-"""
+    """
+    generate a response to the given prompt using GPT-based completion API
+    """
     channel_id = event.get('channel')
     user_id = event.get('user')
     try:
@@ -168,9 +168,10 @@ generate a response to the given prompt using GPT-based completion API
 
 
 def img_generation(event, prompt):
-""" generate image for the given prompt 
+    """
+    generate image for the given prompt 
     and return link to the image as a message
-"""
+    """
     channel_id = event.get('channel')
     user_id = event.get('user')
 
