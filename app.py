@@ -8,6 +8,7 @@ from slack import WebClient
 from slackeventsapi import SlackEventAdapter
 from randombot import RandomBot
 import openai
+from openai import OpenAI
 
 # Initialize a Flask app to host the events adapter
 app = Flask(__name__)
@@ -174,8 +175,10 @@ def img_generation(event, prompt):
     """
     channel_id = event.get('channel')
     user_id = event.get('user')
+     
+    openai_client = OpenAI()
 
-    generated_image = openai.images.generate(
+    generated_image = openai_client.images.generate(
       model=openai_image_gen_model_type, 
       prompt=prompt,
       n=1,
@@ -185,7 +188,7 @@ def img_generation(event, prompt):
     response = "link to image: {}".format(image_url) 
     try:
         # use openAI API to respond to the prompt using image generation
-        generated_image = openai.images.generate(
+        generated_image = openai_client.images.generate(
           model=openai_image_gen_model_type, 
           prompt=prompt,
           n=1,
