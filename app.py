@@ -141,17 +141,6 @@ def chat_completion(event, prompt):
      
     openai_client = OpenAI()
 
-    completion = openai_client.chat.completions.create(
-        model=openai_llm_model_type, 
-        max_tokens=chat_max_tokens,
-        user=user_id,
-        n=1,
-        messages=[
-           {"role": "system", "content": "You are a helpful assistant that provides concise replies to the point."}, 
-           {"role": "user", "content": prompt}
-        ]
-        )
-    response = completion['choices'][0]['message']['content']
     try:
         # use openAI API to respond to the prompt using chat-completion method
         completion = openai_client.chat.completions.create(
@@ -164,10 +153,9 @@ def chat_completion(event, prompt):
                {"role": "user", "content": prompt}
             ]
             )
-        response = completion['choices'][0]['message']['content']
+        response = completion.choices[0].message.content
     except:
-        response += "DUDUDUD"
-        #response = "(connection to chatGPT probably timed out)"
+        response = "(connection to chatGPT probably timed out)"
 	
     # include the response in a standard message block
     message_block = {
