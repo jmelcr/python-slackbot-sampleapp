@@ -132,6 +132,12 @@ def message(payload):
 
 
 
+
+NEEDS FIXGIN
+||||||||
+VVVVVVVV
+
+
 def chat_completion(event, prompt):
     """
     generate a response to the given prompt using GPT-based completion API
@@ -143,7 +149,7 @@ def chat_completion(event, prompt):
 
     try:
         # use openAI API to respond to the prompt using chat-completion method
-        completion = openai_client.client.chat.completions.create(
+        completion = openai_client.chat.completions.create(
             model=openai_llm_model_type, 
             max_tokens=chat_max_tokens,
             user=user_id,
