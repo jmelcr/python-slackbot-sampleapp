@@ -132,12 +132,6 @@ def message(payload):
 
 
 
-
-NEEDS FIXGIN
-||||||||
-VVVVVVVV
-
-
 def chat_completion(event, prompt):
     """
     generate a response to the given prompt using GPT-based completion API
@@ -160,7 +154,7 @@ def chat_completion(event, prompt):
                {"role": "user", "content": prompt}
             ]
             )
-        response = completion['choices'][0]['message']['content']
+        response = completion.choices[0].message.content
     except:
         response = "(connection to chatGPT probably timed out)"
 	
