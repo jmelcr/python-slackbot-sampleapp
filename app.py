@@ -25,6 +25,7 @@ chat_request_timeout = float(os.environ.get("CHAT_REQUEST_TIMEOUT"))
 openai_llm_model_type = str(os.environ.get("OPENAI_LLM_MODEL_TYPE"))
 openai_image_gen_model_type = str(os.environ.get("OPENAI_IMG_GEN_MODEL_TYPE"))
 openai_image_size = str(os.environ.get("OPENAI_IMG_SIZE"))
+biz_info =  str(os.environ.get("BIZ_INFO"))
 
 def random_action(channel, action=None, **kwargs):
     """Determine which action to perform based on parameter. For roll die if 
@@ -129,7 +130,16 @@ def message(payload):
                 )
             x.start()
             return None
-
+	# provide a chat-completion response including information stored in biz_info env var
+        elif text.lower().startswith(("qbi ","qbi:")):
+            prompt = ' '.join([biz_info, text[2:]])
+            # starting a new thread for doing the actual openAI API calling
+            x = threading.Thread(
+                    target=chat_completion,
+                    args=(event, prompt)
+                )
+            x.start()
+            return None
 
 
 def chat_completion(event, prompt):
